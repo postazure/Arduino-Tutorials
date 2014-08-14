@@ -9,20 +9,20 @@ const int pinGre_led = 6;
 const int pinBlu_led = 7;
 const int pinSpeaker = 11;
 
-int roundCounter;
-int simon_pick[20] = {};
-
 int led_string[] = {
   pinRed_led, pinYel_led, pinGre_led, pinBlu_led};
 int btn_string[] = {
   pinRed_btn, pinYel_btn, pinGre_btn, pinBlu_btn};
+  
+int roundCounter;
+int simon_pick[100] = {};
 
 int gameRunning = 1;
 
 //debounce
 int debounceTime = 300;
 int timeMark = millis();
-int user_guess; //= 4;
+int user_guess;
 
 
 void display_simon(){ //shows the colors at start of round 
@@ -62,30 +62,21 @@ void get_guess(){ //wait for player to guess (debounce)
   if(timeDelta > debounceTime){
     timeMark = millis();
     if(digitalRead(pinRed_btn) == HIGH){
-      play_tone(0);
       user_guess = 0;
-      flash_led(0, 350);
     }
     else if(digitalRead(pinYel_btn) == HIGH){
-      play_tone(1);
       user_guess = 1;
-      flash_led(1,350);      
     }
     else if(digitalRead(pinGre_btn) == HIGH){
-      play_tone(2);
       user_guess = 2;
-      flash_led(2,350);
     }
     else if(digitalRead(pinBlu_btn) == HIGH){
-      play_tone(3);
       user_guess = 3;
-      flash_led(3,350);
     }   
-
+    play_tone(user_guess);
+    flash_led(user_guess, 350);
   }
-
 }
-
 
 void check_guess(int _i){ //match guess with simon's pick, determine if correct
   if(user_guess != simon_pick[_i]){
