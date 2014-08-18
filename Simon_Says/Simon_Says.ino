@@ -3,19 +3,35 @@ int simonPicks[] = {
 };
 int pick;
 // 0 = red, 1 = yellow, 2 = green, 3 = blue
-int pinRed_led = 2;
-int pinRed_btn = 4;
-int pinYel_led = 3;
-int pinYel_btn = 5;
-int pinGre_led = 11;
-int pinGre_btn = 9;
-int pinBlu_led = 12;
-int pinBlu_btn = 10;
+int pinRed_led = 4;
+int pinRed_btn = 2;
+int pinYel_led = 5;
+int pinYel_btn = 3;
+int pinGre_led = 6;
+int pinGre_btn = 8;
+int pinBlu_led = 7;
+int pinBlu_btn = 12;
 boolean waiting = true;
 
 int roundCount = 0;
 
 int user_guess;
+int btn;
+
+void gameReady(){
+  digitalWrite(pinRed_led, HIGH);
+  digitalWrite(pinYel_led, HIGH);
+  digitalWrite(pinGre_led, HIGH);
+  digitalWrite(pinBlu_led, HIGH);
+  delay(1000);
+  digitalWrite(pinRed_led, LOW);
+  digitalWrite(pinYel_led, LOW);
+  digitalWrite(pinGre_led, LOW);
+  digitalWrite(pinBlu_led, LOW); 
+    roundCount = 0;
+
+  user_guess = 4;
+}
 
 void gameOver(){
   Serial.print("Game Over Score:");
@@ -27,12 +43,67 @@ void gameOver(){
     digitalWrite(pinRed_led, LOW);
     delay(100); 
   }
+  Serial.println("Waiting for new game");
   delay(3000);
+  gameReady();
 }
+
+void debounce(){
+  int timeMark;
+  int timeDelta;
+  const int debounceTime = 700;
+
+  timeDelta = millis() - timeMark;
+
+  if(btn != 4 && timeDelta > debounceTime){
+    timeMark = millis();
+    user_guess = btn;
+    btn = 4;
+  }
+  else{
+    btn = 4;
+    delay(100);
+  }
+}
+
+void get_guess(){
+  Serial.print("get_guess");
+  Serial.println(user_guess);
+  if(user_guess == 0){ //red
+    digitalWrite(pinRed_led, HIGH);
+    delay(100);
+    digitalWrite(pinRed_led, LOW);
+    Serial.print("User Guess ");
+    Serial.println("Red");
+  }
+  else if(user_guess == 1){ //yellow
+    digitalWrite(pinYel_led, HIGH);
+    delay(100);
+    digitalWrite(pinYel_led, LOW);
+    Serial.print("User Guess ");
+    Serial.println("Yellow");  
+  }
+  else if(user_guess == 2){  //green
+    digitalWrite(pinGre_led, HIGH);
+    delay(100);
+    digitalWrite(pinGre_led, LOW);      
+    Serial.print("User Guess ");
+    Serial.println("Green");
+  }
+  else if(user_guess == 3){ //blue
+    digitalWrite(pinBlu_led, HIGH);
+    delay(100);
+    digitalWrite(pinBlu_led, LOW);  
+    Serial.print("User Guess ");
+    Serial.println("Blue");
+  }
+
+}
+
 
 void setup(){
   Serial.begin(9600);
-  Serial.print("Game Start");
+  Serial.println("Game Start");
 
   //OUTPUTS
   pinMode(pinRed_led, OUTPUT);
@@ -45,62 +116,70 @@ void setup(){
   pinMode(pinYel_btn, INPUT);
   pinMode(pinGre_btn, INPUT);
   pinMode(pinBlu_btn, INPUT);
-  
-  digitalWrite(pinRed_led, HIGH);
-  digitalWrite(pinYel_led, HIGH);
-  digitalWrite(pinGre_led, HIGH);
-  digitalWrite(pinBlu_led, HIGH);
-  delay(1000);
-  digitalWrite(pinRed_led, LOW);
-  digitalWrite(pinYel_led, LOW);
-  digitalWrite(pinGre_led, LOW);
-  digitalWrite(pinBlu_led, LOW);
-  
+
+
+  gameReady(); 
+
+
 }
 
 void loop(){
-  //Serial.println(a);
+
   pick = random(4);
   simonPicks[roundCount] = pick;
 
-  for(int i; i <= roundCount; i++){
-    digitalWrite(simonPicks[i], HIGH);
-    delay(500);
-    digitalWrite(simonPicks[i], LOW);
-    delay(20);
+  for(int i = 0; i <= roundCount; i++){
+
+    if(simonPicks[i] == 0){
+      digitalWrite(pinRed_led, HIGH);
+      delay(750);
+      digitalWrite(pinRed_led, LOW);
+      delay(100);
+    }
+    else if(simonPicks[i] == 1){
+      digitalWrite(pinYel_led, HIGH);
+      delay(750);
+      digitalWrite(pinYel_led, LOW);
+      delay(100);
+    }
+    else if(simonPicks[i] == 2){
+      digitalWrite(pinGre_led, HIGH);
+      delay(750);
+      digitalWrite(pinGre_led, LOW);
+      delay(100);
+    }
+    else if(simonPicks[i] == 3){
+      digitalWrite(pinBlu_led, HIGH);
+      delay(750);
+      digitalWrite(pinBlu_led, LOW);
+      delay(100);
+    }
     Serial.println(simonPicks[i]);
+    Serial.println(roundCount);
   }
 
-  for(int j; j <= roundCount; j++){
+  for(int j = 0; j <= roundCount; j++){
 
-    waiting = true;
-    while(waiting == true){
-      Serial.println("Waiting..");
-      if(digitalRead(pinRed_btn) == HIGH){
-        user_guess = 0;
-        Serial.print("User Guess ");
-        Serial.println("Red");
-        waiting = false;
-      }
-      if(digitalRead(pinYel_btn) == HIGH){
-        user_guess = 1;
-        Serial.print("User Guess ");
-        Serial.println("Yellow");
-        waiting = false;
-      }
-      if(digitalRead(pinGre_btn) == HIGH){
-        user_guess = 2;
-        Serial.print("User Guess ");
-        Serial.println("Green");
-        waiting = false;
-      }
-      if(digitalRead(pinBlu_btn) == HIGH){
-        Serial.print("User Guess ");
-        Serial.println("Blue");
-        user_guess = 3;
-        waiting = false;
-      }
+
+    while(digitalRead(pinRed_btn) == LOW && digitalRead(pinYel_btn) == LOW && digitalRead(pinGre_btn) == LOW && digitalRead(pinBlu_btn) == LOW){
     }
+    //Serial.println("Waiting..");
+
+    if(digitalRead(pinRed_btn) == HIGH){
+      btn = 0;
+    }
+    if(digitalRead(pinYel_btn) == HIGH){
+      btn = 1;
+    }
+    if(digitalRead(pinGre_btn) == HIGH){
+      btn = 2;
+    }
+    if(digitalRead(pinBlu_btn) == HIGH){
+      btn = 3;
+    }
+
+    debounce();
+    get_guess();
 
     if(simonPicks[j] != user_guess){
       gameOver();
@@ -110,6 +189,12 @@ void loop(){
 
   roundCount++; //increase the round and score
 }
+
+
+
+
+
+
 
 
 
